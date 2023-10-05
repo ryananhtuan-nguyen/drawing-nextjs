@@ -42,7 +42,8 @@ const Home = () => {
   //state to disable onMouseDown when someone is drawing
   const [isPlaying, setIsPlaying] = useState(false);
   //state to show score
-  const [score, setScore] = useState('');
+  const [score, setScore] = useState(0);
+  const [opScore, setOpScore] = useState(0);
   //chances to guess the drawing
   const [chances, setChances] = useState(3);
 
@@ -54,11 +55,19 @@ const Home = () => {
   }
 
   function handleInputChange(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Escape') {
+      setInput('');
+    }
     const isValidCharacter =
       /^[a-zA-Z0-9.,!?;:'"()\-+=*/%&\[\]{}|\\<>\s]$/.test(e.key);
     if (isValidCharacter) setInput(() => input + e.key);
     if (e.key === 'Enter') {
       if (input == secret) {
+        const newScore = score + 100;
+        setScore(newScore);
+        socket.emit('new-score', newScore);
+        setIsPlaying(true);
+        socket.emit('chosen-word', '');
         alert('fking correct');
         setInput('');
       } else {
@@ -82,6 +91,9 @@ const Home = () => {
     socket.on('current-word', (word: string) => {
       setIsPlaying(false);
       setSecret(word);
+    });
+    socket.on('op-score', (score: number) => {
+      setOpScore(score);
     });
     return () => {
       socket.off('get-users');
@@ -113,9 +125,15 @@ const Home = () => {
             </button>
           </div>
         )}
-        {hasName && <h2 className='text-center '>{currName}</h2>}
+        {hasName && (
+          <h2 className='text-center '>
+            {currName},{score}
+          </h2>
+        )}
         {newUser.length > 0 && (
-          <div className='text-center'>Opponent: {newUser}</div>
+          <div className='text-center'>
+            Opponent: {newUser},{opScore}
+          </div>
         )}
       </div>
       {hasName && (
@@ -128,7 +146,7 @@ const Home = () => {
                   Start game
                 </button>
               )}
-              {word.length > 0 && <h2>Current Word: {word}</h2>}
+              {word.length > 0 && <h2>Word: {word}</h2>}
             </div>
           )}{' '}
         </>

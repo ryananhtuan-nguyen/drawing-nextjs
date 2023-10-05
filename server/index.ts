@@ -38,6 +38,9 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('current-word', word);
   });
   socket.on('clear', () => io.emit('clear'));
+  socket.on('new-score', (newScore: number) => {
+    socket.broadcast.emit('op-score', newScore);
+  });
 });
 
 server.listen(3001, () => {
