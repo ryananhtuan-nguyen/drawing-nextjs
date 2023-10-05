@@ -1,0 +1,30 @@
+{
+  "name": "drawing-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "bufferutil": "^4.0.7",
+    "next": "^13.5.4",
+    "react": "latest",
+    "react-color": "^2.19.3",
+    "react-dom": "latest",
+    "socket.io-client": "^4.7.2",
+    "utf-8-validate": "^6.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-color": "^3.0.7",
+    "@types/react-dom": "latest",
+    "autoprefixer": "latest",
+    "postcss": "latest",
+    "tailwindcss": "latest",
+    "typescript": "latest"
+  }
+}
