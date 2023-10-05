@@ -13,13 +13,13 @@ export const GameBoard = ({ isPlaying }: { isPlaying: boolean }) => {
     const ctx = canvasRef.current?.getContext('2d');
 
     // socket.emit('client-ready');
+    socket.emit('client-ready');
     socket.on('get-canvas-state', () => {
       if (!canvasRef.current?.toDataURL()) return;
       socket.emit('canvas-state', canvasRef.current.toDataURL());
     });
 
     socket.on('canvas-state-from-server', (state: string) => {
-      console.log('received state');
       const img = new Image();
       img.src = state;
       img.onload = () => {
@@ -50,31 +50,26 @@ export const GameBoard = ({ isPlaying }: { isPlaying: boolean }) => {
     drawLine({ prevPoint, currentPoint, ctx, color });
   }
   return (
-    <div className='w-screen h-screen bg-white flex justify-center items-center'>
-      <div className='flex flex-col mr-10'>
-        <ChromePicker color={color} onChange={(e) => setColor(e.hex)} />
-        <button
-          type='button'
-          className='p-2 border mt-4 cursor-pointer hover:text-white hover:bg-black border-black rounded-2xl text-black'
-          onClick={() => socket.emit('clear')}
-        >
-          Clear canvas
-        </button>
-        <button
-          type='button'
-          className='p-2 border mt-4 cursor-pointer hover:text-white hover:bg-black border-black rounded-2xl text-black'
-          onClick={() => socket.emit('client-ready')}
-        >
-          Connect
-        </button>
+    <>
+      <div className='w-screen h-screen bg-white flex justify-center items-center'>
+        <div className='flex flex-col mr-10'>
+          <ChromePicker color={color} onChange={(e) => setColor(e.hex)} />
+          <button
+            type='button'
+            className='p-2 border mt-4 cursor-pointer hover:text-white hover:bg-black border-black rounded-2xl text-black'
+            onClick={() => socket.emit('clear')}
+          >
+            Clear canvas
+          </button>
+        </div>
+        <canvas
+          onMouseDown={!isPlaying ? () => {} : onMouseDown}
+          ref={canvasRef}
+          width={750}
+          height={750}
+          className='border border-black rounded-md'
+        />
       </div>
-      <canvas
-        onMouseDown={!isPlaying ? () => {} : onMouseDown}
-        ref={canvasRef}
-        width={750}
-        height={750}
-        className='border border-black rounded-md'
-      />
-    </div>
+    </>
   );
 };
