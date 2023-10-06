@@ -34,7 +34,6 @@ io.on('connection', (socket) => {
   });
 
   socket.on('chosen-word', (word: string) => {
-    console.log(word);
     socket.broadcast.emit('current-word', word);
   });
 
