@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 import { GameBoard } from './components/GameBoard';
 import { useEffect, useState } from 'react';
 import random from '@/utils/randomNumber';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 export const socket = io('http://localhost:3001');
 
 export interface pageProps {}
@@ -15,6 +15,7 @@ export type DrawLineProps = {
 };
 
 const Home = () => {
+  const router = useRouter();
   const randomWords = [
     'Elephant',
     'Harmony',
@@ -46,7 +47,11 @@ const Home = () => {
   const [opScore, setOpScore] = useState(0);
   //chances to guess the drawing
   const [chances, setChances] = useState(3);
-
+  //display timer
+  const [timer, setTimer] = useState(3);
+  //timer started
+  const [timerStarted, setTimerStarted] = useState(false);
+  //-----------------------------------------
   function handleClick() {
     const newWord = randomWords[random()];
     setWord(newWord);
@@ -63,11 +68,12 @@ const Home = () => {
     if (isValidCharacter) setInput(() => input + e.key);
     if (e.key === 'Enter') {
       if (input == secret) {
+        setChances(3);
         const newScore = score + 100;
         setScore(newScore);
         socket.emit('new-score', newScore);
-        setIsPlaying(true);
-        socket.emit('chosen-word', '');
+        setIsPlaying(false);
+        setSecret('');
         alert('fking correct');
         setInput('');
       } else {
@@ -85,20 +91,52 @@ const Home = () => {
   }
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    if (score === 200) {
+      socket.emit('winner', currName);
+    }
+    if (opScore === 200) {
+      socket.emit('winner', newUser);
+    }
+
+    socket.on('game-over', (name: string) => {
+      router.push(`/winner?name=${name}`);
+    });
     socket.on('new-joined', (name: string) => {
       setNewUser(name);
     });
     socket.on('current-word', (word: string) => {
       setIsPlaying(false);
       setSecret(word);
+      if (word.length > 0) {
+        setTimerStarted(true);
+        const token = setTimeout(() => {
+          alert('times up');
+          socket.emit('chosen-word', '');
+          socket.emit('next-turn');
+          setSecret('');
+          setTimerStarted(false);
+          clearTimeout(token);
+        }, 3000);
+      }
+    });
+
+    socket.on('next-turn', () => {
+      setIsPlaying(true);
     });
     socket.on('op-score', (score: number) => {
       setOpScore(score);
     });
+
     return () => {
       socket.off('get-users');
+      if (timer == 0) {
+        clearInterval(timeoutId);
+        setTimerStarted(false);
+        setTimer(3);
+      }
     };
-  }, [secret]);
+  }, [timer, timerStarted]);
 
   return (
     <div className='w-full'>
@@ -167,6 +205,7 @@ const Home = () => {
           <div>Chances: {chances}</div>
         </div>
       )}
+      <h1>{timer}</h1>
       {hasName && <GameBoard key='word' isPlaying={isPlaying} />}
     </div>
   );

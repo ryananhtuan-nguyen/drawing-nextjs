@@ -37,6 +37,13 @@ io.on('connection', (socket) => {
     console.log(word);
     socket.broadcast.emit('current-word', word);
   });
+
+  socket.on('winner', (name: string) => {
+    io.emit('game-over', name);
+  });
+  socket.on('next-turn', () => {
+    socket.broadcast.emit('next-turn');
+  });
   socket.on('clear', () => io.emit('clear'));
   socket.on('new-score', (newScore: number) => {
     socket.broadcast.emit('op-score', newScore);
