@@ -1,11 +1,15 @@
-'use client'
-import { io } from 'socket.io-client'
-import { GameBoard } from './components/GameBoard'
-import { useEffect, useState } from 'react'
-import random from '@/utils/randomNumber'
-import { useRouter } from 'next/navigation'
 
-export const socket = io('http://localhost:3001')
+'use client';
+import { io } from 'socket.io-client';
+import { GameBoard } from './components/GameBoard';
+import { useEffect, useState } from 'react';
+import random from '@/utils/randomNumber';
+import { useRouter } from 'next/navigation';
+import { time } from 'console';
+import { TimerDrawing } from './components/TimerDrawing';
+import { TimerGuessing } from './components/TimerGuessing';
+export const socket = io('http://localhost:3001');
+
 
 export interface pageProps {}
 
@@ -49,24 +53,35 @@ const Home = () => {
   //chances to guess the drawing
   const [chances, setChances] = useState(3)
   //display timer
-  const [timer, setTimer] = useState(3)
+
+  const [timerDrawing, setTimerDrawing] = useState(3);
+  const [timerGuessing, setTimerGuessing] = useState(3);
   //timer started
-  const [timerStarted, setTimerStarted] = useState(false)
+  const [timerStarted1, setTimerStarted1] = useState(false);
+  const [timerStarted2, setTimerStarted2] = useState(false);
   //-----------------------------------------
   function handleClick() {
-    const newWord = randomWords[random()]
-    setWord(newWord)
-    socket.emit('chosen-word', newWord)
-    setIsPlaying(true)
+    const newWord = randomWords[random()];
+    setWord(newWord);
+    socket.emit('chosen-word', newWord);
+    socket.emit('clear');
+    setIsPlaying(true);
+    setTimerStarted1(true);
+
   }
 
   function handleInputChange(e: React.KeyboardEvent<HTMLInputElement>) {
+    //Press Escape to erase
     if (e.key === 'Escape') {
       setInput('')
     }
+    //checking valid input
     const isValidCharacter =
-      /^[a-zA-Z0-9.,!?;:'"()\-+=*/%&\[\]{}|\\<>\s]$/.test(e.key)
-    if (isValidCharacter) setInput(() => input + e.key)
+
+      /^[a-zA-Z0-9.,!?;:'"()\-+=*/%&\[\]{}|\\<>\s]$/.test(e.key);
+    if (isValidCharacter) setInput(() => input + e.key);
+
+    //checking guesses
     if (e.key === 'Enter') {
       if (input == secret) {
         setChances(3)
@@ -92,14 +107,13 @@ const Home = () => {
   }
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout
+
     if (score === 200) {
       socket.emit('winner', currName)
     }
     if (opScore === 200) {
       socket.emit('winner', newUser)
     }
-
     socket.on('game-over', (name: string) => {
       router.push(`/winner?name=${name}`)
     })
@@ -107,20 +121,10 @@ const Home = () => {
       setNewUser(name)
     })
     socket.on('current-word', (word: string) => {
-      setIsPlaying(false)
-      setSecret(word)
-      if (word.length > 0) {
-        setTimerStarted(true)
-        const token = setTimeout(() => {
-          alert('times up')
-          socket.emit('chosen-word', '')
-          socket.emit('next-turn')
-          setSecret('')
-          setTimerStarted(false)
-          clearTimeout(token)
-        }, 3000)
-      }
-    })
+      setTimerStarted2(true);
+      setIsPlaying(false);
+      setSecret(word);
+    });
 
     socket.on('next-turn', () => {
       setIsPlaying(true)
@@ -130,15 +134,10 @@ const Home = () => {
     })
 
     return () => {
-      socket.off('get-users')
-      if (timer == 0) {
-        clearInterval(timeoutId)
-        setTimerStarted(false)
-        setTimer(3)
-      }
-    }
-  }, [timer, timerStarted])
-
+      socket.off('get-users');
+    };
+  }, []);
+  
   return (
     <div className="w-full">
       <h1 className="text-4xl mt-12 text-center">SketchWar🖌️</h1>
@@ -190,16 +189,23 @@ const Home = () => {
                   Start game
                 </button>
               )}
-              {word.length > 0 && <h2 className="mt-5">Word: {word}</h2>}
+
             </div>
           )}{' '}
         </>
       )}
-      {secret.length > 0 && hasName && (
-        <h2 className="text-3xl mt-12 text-center">
-          Current Word: {secret.length > 0 ? secret.length : 'Nothing'}
+
+      {/*  */}
+      {timerStarted1 && (
+        <h2 className='text-3xl mt-12 text-center'>Current Word: {word}</h2>
+      )}
+      {timerStarted2 && secret.length > 0 && (
+        <h2 className='text-3xl mt-12 text-center'>
+          Word Length: {secret.length}
+
         </h2>
       )}
+      {/*  */}
       {hasName && !isPlaying && secret.length > 0 && (
         <div className="text-center">
           <input
@@ -211,8 +217,28 @@ const Home = () => {
           <div>Chances: {chances}</div>
         </div>
       )}
-      <h1>{timer}</h1>
-      {hasName && <GameBoard key="word" isPlaying={isPlaying} />}
+
+
+      {timerStarted1 && (
+        <div className='text-center'>
+          <TimerDrawing
+            timerDrawing={timerDrawing}
+            setTimerDrawing={setTimerDrawing}
+            setTimerStarted1={setTimerStarted1}
+          />
+        </div>
+      )}
+      {timerStarted2 && secret.length > 0 && (
+        <div className='text-center'>
+          <TimerGuessing
+            timerGuessing={timerGuessing}
+            setTimerGuessing={setTimerGuessing}
+            setTimerStarted2={setTimerStarted2}
+          />
+        </div>
+      )}
+      {hasName && <GameBoard key='word' isPlaying={isPlaying} />}
+
     </div>
   )
 }
