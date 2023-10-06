@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:global {
+  padding: 50px;
+}
+
+body {
+  background-color: white;
+  background-image: url('https://slidechef.net/wp-content/uploads/2022/12/Paint-brush-background.jpg');
+  background-size: cover;
+  font-family: 'Autour One', cursive;
+  font-size: x-large;
+  color: rgb(2, 2, 85);
+  padding: 50px;
+}
