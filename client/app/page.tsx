@@ -163,13 +163,15 @@ const Home = () => {
           </div>
         )}
         {hasName && (
-          <h2 className="flex justify-center mt-5">
-            {currName}:{score}
-          </h2>
+          <>
+            <h2 className="flex justify-center mt-5">{currName}</h2>
+            <h2 className="flex justify-center mt-5">Points:{score}</h2>
+          </>
         )}
         {newUser.length > 0 && (
           <div className="text-center mt-5">
-            Opponent: {newUser}:{opScore}
+            <h2 className="flex justify-center mt-5">Opponent {newUser} </h2>
+            <h2 className="flex justify-center mt-5">Points:{opScore}</h2>
           </div>
         )}
       </div>
