@@ -1,15 +1,13 @@
-
-'use client';
-import { io } from 'socket.io-client';
-import { GameBoard } from './components/GameBoard';
-import { useEffect, useState } from 'react';
-import random from '@/utils/randomNumber';
-import { useRouter } from 'next/navigation';
-import { time } from 'console';
-import { TimerDrawing } from './components/TimerDrawing';
-import { TimerGuessing } from './components/TimerGuessing';
-export const socket = io('http://localhost:3001');
-
+'use client'
+import { io } from 'socket.io-client'
+import { GameBoard } from './components/GameBoard'
+import { useEffect, useState } from 'react'
+import random from '@/utils/randomNumber'
+import { useRouter } from 'next/navigation'
+import { time } from 'console'
+import { TimerDrawing } from './components/TimerDrawing'
+import { TimerGuessing } from './components/TimerGuessing'
+export const socket = io('http://localhost:3001')
 
 export interface pageProps {}
 
@@ -54,20 +52,19 @@ const Home = () => {
   const [chances, setChances] = useState(3)
   //display timer
 
-  const [timerDrawing, setTimerDrawing] = useState(3);
-  const [timerGuessing, setTimerGuessing] = useState(3);
+  const [timerDrawing, setTimerDrawing] = useState(3)
+  const [timerGuessing, setTimerGuessing] = useState(3)
   //timer started
-  const [timerStarted1, setTimerStarted1] = useState(false);
-  const [timerStarted2, setTimerStarted2] = useState(false);
+  const [timerStarted1, setTimerStarted1] = useState(false)
+  const [timerStarted2, setTimerStarted2] = useState(false)
   //-----------------------------------------
   function handleClick() {
-    const newWord = randomWords[random()];
-    setWord(newWord);
-    socket.emit('chosen-word', newWord);
-    socket.emit('clear');
-    setIsPlaying(true);
-    setTimerStarted1(true);
-
+    const newWord = randomWords[random()]
+    setWord(newWord)
+    socket.emit('chosen-word', newWord)
+    socket.emit('clear')
+    setIsPlaying(true)
+    setTimerStarted1(true)
   }
 
   function handleInputChange(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -77,9 +74,8 @@ const Home = () => {
     }
     //checking valid input
     const isValidCharacter =
-
-      /^[a-zA-Z0-9.,!?;:'"()\-+=*/%&\[\]{}|\\<>\s]$/.test(e.key);
-    if (isValidCharacter) setInput(() => input + e.key);
+      /^[a-zA-Z0-9.,!?;:'"()\-+=*/%&\[\]{}|\\<>\s]$/.test(e.key)
+    if (isValidCharacter) setInput(() => input + e.key)
 
     //checking guesses
     if (e.key === 'Enter') {
@@ -90,12 +86,12 @@ const Home = () => {
         socket.emit('new-score', newScore)
         setIsPlaying(false)
         setSecret('')
-        alert('fking correct')
+        alert('You got it right!')
         setInput('')
       } else {
         const currentChance = chances - 1
         setChances(currentChance)
-        alert('fking wrong')
+        alert('You got it wrong!')
         setInput('')
         if (currentChance == 0) {
           socket.emit('clear')
@@ -107,7 +103,6 @@ const Home = () => {
   }
 
   useEffect(() => {
-
     if (score === 200) {
       socket.emit('winner', currName)
     }
@@ -121,10 +116,10 @@ const Home = () => {
       setNewUser(name)
     })
     socket.on('current-word', (word: string) => {
-      setTimerStarted2(true);
-      setIsPlaying(false);
-      setSecret(word);
-    });
+      setTimerStarted2(true)
+      setIsPlaying(false)
+      setSecret(word)
+    })
 
     socket.on('next-turn', () => {
       setIsPlaying(true)
@@ -134,17 +129,19 @@ const Home = () => {
     })
 
     return () => {
-      socket.off('get-users');
-    };
-  }, []);
-  
+      socket.off('get-users')
+    }
+  }, [])
+
   return (
     <div className="w-full">
-      <h1 className="text-4xl mt-12 text-center">SketchWar🖌️</h1>
+      <h1 className="text-4xl mt-12 text-center">✏️ SketchWar🖌️</h1>
       <div className="w-full m-8">
-        <label className="flex justify-center mt-20">
-          Enter your user name to start!
-        </label>
+        {!hasName && (
+          <label className="flex justify-center mt-20">
+            Enter your user name to start!
+          </label>
+        )}
         {!hasName && (
           <div className="flex justify-center gap-4 mt-6">
             <input
@@ -166,13 +163,15 @@ const Home = () => {
           </div>
         )}
         {hasName && (
-          <h2 className="text-center mt-5">
-            {currName},{score}
-          </h2>
+          <>
+            <h2 className="flex justify-center mt-5">{currName}</h2>
+            <h2 className="flex justify-center mt-5">Points:{score}</h2>
+          </>
         )}
         {newUser.length > 0 && (
           <div className="text-center mt-5">
-            Opponent: {newUser},{opScore}
+            <h2 className="flex justify-center mt-5">Opponent {newUser} </h2>
+            <h2 className="flex justify-center mt-5">Points:{opScore}</h2>
           </div>
         )}
       </div>
@@ -184,12 +183,11 @@ const Home = () => {
               {!isPlaying && (
                 <button
                   onClick={handleClick}
-                  className="p-2 border mt-4 cursor-pointer hover:text-white hover:bg-black border-[rgb(2,2,85)] rounded-2xl"
+                  className="p-2 border mt-4 cursor-pointer hover:text-white hover:bg-gradient-to-r from-red-500 via-orange-500 to-purple-500 transition duration-500 ease-in-out border-[rgb(2,2,85)] rounded-2xl"
                 >
                   Start game
                 </button>
               )}
-
             </div>
           )}{' '}
         </>
@@ -197,12 +195,11 @@ const Home = () => {
 
       {/*  */}
       {timerStarted1 && (
-        <h2 className='text-3xl mt-12 text-center'>Current Word: {word}</h2>
+        <h2 className="text-3xl mt-12 text-center">Current Word: {word}</h2>
       )}
       {timerStarted2 && secret.length > 0 && (
-        <h2 className='text-3xl mt-12 text-center'>
+        <h2 className="text-3xl mt-12 text-center">
           Word Length: {secret.length}
-
         </h2>
       )}
       {/*  */}
@@ -218,9 +215,8 @@ const Home = () => {
         </div>
       )}
 
-
       {timerStarted1 && (
-        <div className='text-center'>
+        <div className="text-center">
           <TimerDrawing
             timerDrawing={timerDrawing}
             setTimerDrawing={setTimerDrawing}
@@ -229,7 +225,7 @@ const Home = () => {
         </div>
       )}
       {timerStarted2 && secret.length > 0 && (
-        <div className='text-center'>
+        <div className="text-center">
           <TimerGuessing
             timerGuessing={timerGuessing}
             setTimerGuessing={setTimerGuessing}
@@ -237,8 +233,7 @@ const Home = () => {
           />
         </div>
       )}
-      {hasName && <GameBoard key='word' isPlaying={isPlaying} />}
-
+      {hasName && <GameBoard key="word" isPlaying={isPlaying} />}
     </div>
   )
 }
