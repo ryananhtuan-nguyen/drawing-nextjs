@@ -1,8 +1,6 @@
 'use client';
 
-import { socket } from '@/app/page';
 import { useEffect } from 'react';
-
 type Props = {
   timerGuessing: number;
   setTimerGuessing: React.Dispatch<React.SetStateAction<number>>;
@@ -17,7 +15,7 @@ export const TimerGuessing = ({
   useEffect(() => {
     if (timerGuessing == 0) {
       setTimerStarted2(false);
-      setTimerGuessing(3);
+      setTimerGuessing(30);
       return;
     }
     if (timerGuessing > 0) {

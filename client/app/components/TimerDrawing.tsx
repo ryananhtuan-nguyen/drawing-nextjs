@@ -17,12 +17,13 @@ export const TimerDrawing = ({
       setTimerStarted1(false);
       socket.emit('clear');
       socket.emit('chosen-word', '');
-      setTimerDrawing(3);
+      setTimerDrawing(30);
       return;
     }
+
     if (timerDrawing > 0) {
-      const newT = timerDrawing - 1;
       const token = setInterval(() => {
+        const newT = timerDrawing - 1;
         setTimerDrawing(newT);
         clearInterval(token);
       }, 1000);
